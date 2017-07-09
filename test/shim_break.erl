@@ -21,19 +21,14 @@ success() ->
     ).
 
 err(Arg) ->
-    try
-        circuit_breaker:call(
-          ?SERVICE,
-          fun() -> exit(Arg) end, timer:hours(1),
-          fun() -> true end, timer:hours(1),
-          options()
-        )
-    catch
-        Type:Reason -> {exception, {Type, Reason}}
-    end.
+    circuit_breaker:call(
+      ?SERVICE,
+      fun() -> {error,Arg} end, timer:hours(1),
+      fun() -> true end, timer:hours(1),
+      options()
+    ).
 
-ignored_error(Reason) ->
-    err(Reason). % same call
+ignored_error(Reason) -> err(Reason). % same call
 
 timeout() ->
     circuit_breaker:call(
@@ -43,11 +38,8 @@ timeout() ->
       options()
     ).
 
-manual_block() ->
-    circuit_breaker:block(?SERVICE).
+manual_block() -> circuit_breaker:block(?SERVICE).
 
-manual_deblock() ->
-    circuit_breaker:deblock(?SERVICE).
+manual_deblock() -> circuit_breaker:deblock(?SERVICE).
 
-manual_reset() ->
-    circuit_breaker:clear(?SERVICE).
+manual_reset() -> circuit_breaker:clear(?SERVICE).
